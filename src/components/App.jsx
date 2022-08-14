@@ -68,7 +68,7 @@ export default class App extends Component {
       }
     }
   }
-  
+  // это приходит из формы при submit
   handleFormSubmit = imageSearch => {
     this.setState({
       imageSearch,
@@ -87,6 +87,7 @@ export default class App extends Component {
     const { images, largePicture, tags, status, showModal, showBtn, loaderActive } = this.state;
     return (
       <div className={s.app}>
+        {/* передача ссылки на ф-цию в виде пропса */}
         <Searchbar onSubmit={this.handleFormSubmit} />
 
           {status === 'idle' && (
