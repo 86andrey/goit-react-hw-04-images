@@ -14,8 +14,8 @@ const Searchbar = ({ onSubmit }) => {
         setImageSearch(e.currentTarget.value.toLowerCase());
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = e => {
+        e.preventDefault(); 
         if (imageSearch.trim() === '') {
             return toast.error('non name');
         }

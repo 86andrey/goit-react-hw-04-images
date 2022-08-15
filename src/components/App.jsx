@@ -1,120 +1,116 @@
-import { Component } from "react";
 import Searchbar from "./Searchbar";
-import ImageAPI from '../services/image-api'
+import fetchImage from '../services/image-api'
 import ImageGallery from "./ImageGallery";
 import Button from "./Button";
 import Modal from "./Modal";
 import s from './App.module.css';
 import { ToastContainer } from 'react-toastify';
 import Loader from "./Loader";
+import { useEffect, useState } from "react";
+// import { toast } from 'react-toastify';
 
 
 
-export default class App extends Component {
-  state = {
-    imageSearch: '',
-    images: [],
-    page: 1,
-    error: null,
-    status: 'idle',
-    largeImage: null,
-    tags: null,
-    showModal: false,
-    showBtn: false,
-    loaderActive: false,
-  };
+export default function App() {
+  const [imageSearch, setImageSearch] = useState ('');
+  const [images, setImages] = useState ([]);
+    const [page, setPage] = useState (1);
+    // const [error, setError] = useState (null);
+    const [status, setStatus] = useState ('idle');
+    const [largeImage, setLargeImage] = useState ('');
+    const [tags, setTags] = useState(null);
+    const [showModal, setShowModal] = useState (false);
+    const [showBtn, setShowBtn] = useState (false);
+    const [loaderActive, setLoaderActive] = useState (false);
+
   
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const loadMore = () => {
+    setPage(prevPage => prevPage + 1)
   };
 
-  async componentDidUpdate(_, prevState) {
-    const prevImage = prevState.imageSearch;
-    const nextImage = this.state.imageSearch;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
-
-    if (prevImage !== nextImage || prevPage !== nextPage) {
-      try {
-        this.setState({ loaderActive: true, });
-         
-        const imagesData = await ImageAPI.fetchImage(nextImage, nextPage);
-
-        this.setState(prevState => ({
-          images: nextPage === 1 ? imagesData.hits : [...prevState.images, ...imagesData.hits],
-          status: 'resolved',
-          showBtn: true,
-        }))
-            
-            if (imagesData.total === 0) {
-              this.setState({
-                status: 'rejected',
-                images: [],
-                showBtn: false
-              });
-            }
-        
-            if (imagesData.total > 0 && imagesData.hits.length < 12) {
-              this.setState({                
-                showBtn: false,
-              });
-             }                  
-      } catch (error) {
-        this.setState({ error, status: 'rejected' })
-      } finally {
-        this.setState({ loaderActive: false });
-      }
-    }
-  }
   // это приходит из формы при submit
-  handleFormSubmit = imageSearch => {
-    this.setState({
-      imageSearch,
-      images: [],
-    page: 1, });
+  const handleFormSubmit = imageSearch => {
+    setImageSearch(imageSearch);
+    setPage(1);
+    setImages([]);
   };
+
+  useEffect(() => {
+    if (!imageSearch) return;
+
+    setLoaderActive(true);
+
+    const getData = async () => {
+      try {
+        const imagesData = await fetchImage(imageSearch, page);
+        
+        if (page === 1) {
+          setImages([...imagesData.hits]);
+        } else {
+          setImages(prevImages => [...prevImages, ...imagesData.hits]);        
+        };
+
+        setStatus('resolved');
+        setShowBtn(true);
+
+        if (imagesData.total === 0) {
+          setStatus('rejected');
+          setImages([]);
+          setShowBtn(false);
+        };
+        
+        if (imagesData.total > 0 && imagesData.hits.length < 12) {
+          setShowBtn(false);
+        };
+      }
+      catch (error) {
+        console.log('oops')
+        setStatus('rejected');
+      } finally {
+        setLoaderActive(false);
+      }
+    };
+    getData();    
+  }, [page, imageSearch]);
+
   
-  toggleModal = (largePicture, tags) => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-    this.setState({ largePicture: largePicture, tags:tags });
+  
+  const toggleModal = (largeImage, tags) => {
+    setShowModal(!showModal);
+    setLargeImage(largeImage);
+    setTags(tags);
   };
-  
-  render() {
-    const { images, largePicture, tags, status, showModal, showBtn, loaderActive } = this.state;
-    return (
-      <div className={s.app}>
-        {/* передача ссылки на ф-цию в виде пропса */}
-        <Searchbar onSubmit={this.handleFormSubmit} />
+    
+return (
+  <div className={s.app}>
+    {/* передача ссылки на ф-цию в виде пропса */}
+    <Searchbar onSubmit={handleFormSubmit} />
 
-          {status === 'idle' && (
-            <h2 className={s.h2}>Type something...</h2>
-          )}
+    {status === 'idle' && (
+      <h2 className={s.h2}>Type something...</h2>
+    )}
 
-        {loaderActive && (
-          <Loader />
-        )}
+    {loaderActive && (
+      <Loader />
+    )}
 
-          {status === 'rejected' && (
-            <h2 className={s.h2}>{'Not found...'}</h2>
-          )}
+    {status === 'rejected' && (
+      <h2 className={s.h2}>{'Not found...'}</h2>
+    )}
 
-        {status === 'resolved' && (        
-          <ImageGallery images={images} openModal={this.toggleModal} />
-        )}
+    {status === 'resolved' && (
+      <ImageGallery images={images} openModal={toggleModal} />
+    )}
       
-        {showBtn && <Button onClick={this.loadMore} />}
+    {showBtn && <Button onClick={loadMore} />}
           
         
-        {showModal && (<Modal
-          onClose={this.toggleModal}
-          largePicture={largePicture}
-          tags={tags}
-        />)}
-        <ToastContainer position="top-center" theme="colored" />
-        </div>
-    ) }
+    {showModal && (<Modal
+      onClose={toggleModal}
+      largePicture={largeImage}
+      tags={tags}
+    />)}
+    <ToastContainer position="top-center" theme="colored" />
+  </div>
+);
   }
