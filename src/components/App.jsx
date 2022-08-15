@@ -105,11 +105,12 @@ return (
     {showBtn && <Button onClick={loadMore} />}
           
         
-    {showModal && (<Modal
+    {showModal && <Modal
       onClose={toggleModal}
       largePicture={largeImage}
       tags={tags}
-    />)}
+    />}
+
     <ToastContainer position="top-center" theme="colored" />
   </div>
 );

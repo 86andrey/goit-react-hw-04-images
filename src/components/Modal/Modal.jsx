@@ -1,22 +1,23 @@
 import React, {useEffect} from "react";
 import { createPortal } from 'react-dom';
 import s from './Modal.module.css';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 
-const selectedModal = document.querySelector('#modal');
+const modalRoot = document.querySelector('#modal-root');
 
-export default function Modal (largePicture, tags, onClose) {
+export default function Modal({largePicture, tags, onClose}) {
   
   useEffect(() => {
     const handleKeyDown = e => {
     if (e.code === 'Escape') {
       onClose();
     }
-  };
+    };
+    
     window.addEventListener('keydown', handleKeyDown);
-   
-    return () =>
+    return () => {
       window.removeEventListener('keydown', handleKeyDown);
+    };
   },[onClose]);
 
   
@@ -32,15 +33,16 @@ export default function Modal (largePicture, tags, onClose) {
           <img src={largePicture} alt={tags} />
         </div>
       </div>,
-      selectedModal);
+      modalRoot
+    );
 };
 
 
 
-Modal.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  tags: PropTypes.array,
-  largePicture: PropTypes.string,
-};
+// Modal.propTypes = {
+//   onClose: PropTypes.func.isRequired,
+//   tags: PropTypes.array,
+//   largePicture: PropTypes.string,
+// };
 
 
