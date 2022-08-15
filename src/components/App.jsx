@@ -4,10 +4,10 @@ import ImageGallery from "./ImageGallery";
 import Button from "./Button";
 import Modal from "./Modal";
 import s from './App.module.css';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import Loader from "./Loader";
 import { useEffect, useState } from "react";
-// import { toast } from 'react-toastify';
+
 
 
 
@@ -54,6 +54,7 @@ export default function App() {
         setShowBtn(true);
 
         if (imagesData.total === 0) {
+          toast(`Sorry, there are no images.`);
           setStatus('rejected');
           setImages([]);
           setShowBtn(false);

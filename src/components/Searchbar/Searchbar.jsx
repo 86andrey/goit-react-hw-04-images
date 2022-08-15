@@ -17,7 +17,7 @@ const Searchbar = ({ onSubmit }) => {
     const handleSubmit = e => {
         e.preventDefault(); 
         if (imageSearch.trim() === '') {
-            return toast.error('non name');
+            return toast.warn('non name');
         }
         onSubmit(imageSearch);
         setImageSearch('');
